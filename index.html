@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Shopping Site</title>
+  <style>
+    body { font-family: Arial; text-align: center; }
+    .product { margin: 20px; }
+    button {
+      padding: 10px;
+      background: green;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🛒 Shopping Site</h1>
+
+<div class="product">
+  <p>Product 1 - ₹100</p>
+  <button onclick="addToCart('Product 1',100)">Add to Cart</button>
+</div>
+
+<div class="product">
+  <p>Product 2 - ₹200</p>
+  <button onclick="addToCart('Product 2',200)">Add to Cart</button>
+</div>
+
+<h2>Cart</h2>
+<ul id="cart"></ul>
+<h3 id="total">Total: ₹0</h3>
+
+<button onclick="checkout()">Checkout</button>
+
+<script>
+let cart = [];
+
+function addToCart(name, price) {
+  let item = cart.find(i => i.name === name);
+  if (item) {
+    item.qty++;
+  } else {
+    cart.push({ name, price, qty: 1 });
+  }
+  renderCart();
+}
+
+function renderCart() {
+  let cartEl = document.getElementById('cart');
+  cartEl.innerHTML = '';
+  let total = 0;
+
+  cart.forEach(item => {
+    total += item.price * item.qty;
+    cartEl.innerHTML += `<li>${item.name} x ${item.qty}</li>`;
+  });
+
+  document.getElementById('total').innerText = "Total: ₹" + total;
+}
+
+async function checkout() {
+  let total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+  await fetch('http://localhost:3000/order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cart, total })
+  });
+
+  let msg = `Order:\n${cart.map(i => i.name + ' x ' + i.qty).join('\n')}\nTotal: ₹${total}`;
+  let phone = "918837544212";
+
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+
+  alert("Order placed!");
+}
+</script>
+
+</body>
+</html>
